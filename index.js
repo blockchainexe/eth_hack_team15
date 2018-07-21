@@ -39,6 +39,8 @@ const verifier = new EmailVerifier({
 
 app.use(bodyParser.json({ strict: false }))
 
+app.set('view engine', 'ejs')
+
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.post('/register', function (req, res) {
