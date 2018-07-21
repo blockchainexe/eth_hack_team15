@@ -66,7 +66,9 @@ app.post('/verify', function (req, res) {
   const callbackUrlWithEmail = jwtDecode(requestToken).callback
   const email = url.parse(callbackUrlWithEmail, true).query.email
 
-  res.json({ msg: 'success' });
+  const identity = verifier.verify(accessToken)
+
+  res.json({ msg: 'success', identity: identity })
 })
 
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
