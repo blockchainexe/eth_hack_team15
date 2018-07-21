@@ -9,6 +9,8 @@ contract EducationPass is ERC721Token, Ownable {
   mapping(uint => uint) public expireDates;
   uint public constant EXPIRE_TERM = 365 days; // 1 years
 
+  event Extended(address indexed student, uint indexed tokenId);
+
   constructor() public ERC721Token("EducationPass", "EPT") {
   }
 
@@ -17,6 +19,7 @@ contract EducationPass is ERC721Token, Ownable {
     if (_exists(_uportId)) {
       require(_expired(_uportId), "the token activate yet.");
       removeTokenFrom(_to, _uportId);
+      emit Extended(_to, _uportId);
     }
     _mint(_to, _uportId);
     expireDates[_uportId] = now + EXPIRE_TERM;

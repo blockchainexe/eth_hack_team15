@@ -1,21 +1,11 @@
 import lkTestHelpers from 'lk-test-helpers/src/main.js'
 const {
-  advanceBlock,
-  advanceToBlock,
-  assertJump,
-  ether,
-  latestTime,
   increaseTime,
-  increaseTimeTo,
-  EVMThrow,
-  expectThrow,
-  expectRevert,
-  hashMessage,
-  timer,
-  toPromise,
-  transactionMined
+  expectRevert
 } = lkTestHelpers(web3)
 var EducationPass = artifacts.require("EducationPass.sol");
+
+const callback = (e, r) => new Promise((resolve, reject) => (e ? reject(e) : resolve(r)))
 
 contract('EducationPass', function(accounts) {
   it("should assert true", async () => {
@@ -87,12 +77,8 @@ contract('EducationPass', function(accounts) {
       await educationPass.mint(accounts[0], 12345)
       const extended = await educationPass.exists(12345)
       assert.isTrue(extended)
-
     })
-  })
-
-  describe('fail other id', () => {
-    it('success', async () => {
+    it('fail other id', async () => {
       const educationPass = await EducationPass.new()
       await educationPass.mint(accounts[0], 12345)
       const exists = await educationPass.exists(12345)
@@ -102,10 +88,7 @@ contract('EducationPass', function(accounts) {
 
       await expectRevert(educationPass.mint(accounts[0], 123456))
     })
-  })
-
-  describe('fail other owner', () => {
-    it('success', async () => {
+    it('fail other owner', async () => {
       const educationPass = await EducationPass.new()
       await educationPass.mint(accounts[0], 12345)
       const exists = await educationPass.exists(12345)
@@ -114,6 +97,22 @@ contract('EducationPass', function(accounts) {
       assert.isFalse(expiredExists)
 
       await expectRevert(educationPass.mint(accounts[1], 12345))
+    })
+    it('happend event', async () => {
+      const educationPass = await EducationPass.new()
+      const filter = await educationPass.Extended({}, { fromBlock: 0, toBlock: 'latest' }, callback)
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
+      const expiredExists = await educationPass.exists(12345)
+      assert.isFalse(expiredExists)
+
+      await educationPass.mint(accounts[0], 12345)
+      const events = filter.get()
+
+      assert.equal(1, events.length)
+      assert.equal(accounts[0], events[0].args.student)
+      assert.equal(12345, events[0].args.tokenId)
     })
   })
 });
