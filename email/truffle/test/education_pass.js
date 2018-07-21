@@ -69,7 +69,7 @@ contract('EducationPass', function(accounts) {
       const exists = await educationPass.exists(12345)
       assert.isTrue(exists)
 
-      await increaseTime((4 * 365 * 24 * 60 * 60) + 2000)
+      await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
       const expiredExists = await educationPass.exists(12345)
       assert.isFalse(expiredExists)
     })

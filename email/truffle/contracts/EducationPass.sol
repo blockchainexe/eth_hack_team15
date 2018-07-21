@@ -7,7 +7,7 @@ import '../node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol
 
 contract EducationPass is ERC721Token, Ownable {
   mapping(uint => uint) public expireDates;
-  uint public constant EXPIRE_TERM = (365 days) * 4; // 4 years
+  uint public constant EXPIRE_TERM = 365 days; // 1 years
 
   constructor() public ERC721Token("EducationPass", "EPT") {
   }
