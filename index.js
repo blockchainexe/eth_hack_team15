@@ -41,12 +41,12 @@ app.use(bodyParser.json({ strict: false }))
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.post('/register', function (req, res) {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', '*')
 
   const email = req.body.email
-  const requestToken = verifier.receive(email);
+  const requestToken = verifier.receive(email)
 
-  res.json({ msg: 'success' });
+  res.json({ msg: 'success' })
 })
 
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
