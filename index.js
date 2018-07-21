@@ -49,4 +49,8 @@ app.post('/register', function (req, res) {
   res.json({ msg: 'success' })
 })
 
+app.get('/verify', function (req, res) {
+
+})
+
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
