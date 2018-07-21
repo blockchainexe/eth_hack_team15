@@ -29,63 +29,37 @@ const uPortApp = new uport.Credentials({
 app.use(bodyParser.json({ strict: false }))
 
 app.get('/', (req, res) => function (req, res) {
-  // TODO: とりあえずのフローなんでもっといいのあったらそっちにする
-  // - student: put email to form
-  res.send('Super duper coolest email form!!!')
+  res.send('Let user input his unique info')
 })
-
-app.post('/events/:id/register', function (req, res) {
-  res.header('Access-Control-Allow-Origin', '*')
-
-
-  // TODO: とりあえずのフローなんでもっといいのあったらそっちにする
-  // - system: send QR to email
-  // - student: scan QR
-  // - student: accept verification
-  // - system: got hit /verify action
-
-  let verifier = new EmailVerifier({
-    credentials: uPortApp,
-    callbackUrl: `https://${host}/events/${req.body.id}/verify`,
-    user: emailUser,
-    pass: emailPass,
-    service: 'gmail',
-    confirmationSubject: 'uPort Identity ',
-    confirmationTemplate: qr => `<html>...${qr}...</html>`,
-    attestationSubject: 'uPort Email Attestation',
-    attestationTemplate: qr => `<html>...${qr}...</html>`,
-    customRequestParams: {},
-    qrFolder: './tmp'
+app.get('/show_request', (req, res) => function (req, res) {
+  // この画面でuport-connect使ってloginさせてそのままclientでrequestCredentialsさせたほうがいい？
+  /*
+  // client側
+  const connect = new uportconnect.Connect('app name')
+  connect.showRequest(requestToken).then(response => {
+    // send response back to server
   })
-
-  const email = req.body.email
-  const requestToken = verifier.receive(email)
-
-  res.json({ msg: 'success' })
+  */
+  res.send('Let user input his unique info')
 })
 
-app.get('/events/:id/verify', async function (req, res) {
+
+app.post('/events/:id/request_token', async function (req, res) {
   res.header("Access-Control-Allow-Origin", "*");
-  const accessToken = req.body.access_token
-  const requestToken = jwtDecode(accessToken).req
-  const callbackUrlWithEmail = jwtDecode(requestToken).callback
-  const email = url.parse(callbackUrlWithEmail, true).query.email
+  const requestToken = await uPortApp.createRequest({
+    requested: ['name','phone','identity_no'],
+    callbackUrl: 'https://....' // URL to send the response of the request to
+  })
+})
 
+app.post('/events/:id/coupon', async function (req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  const profile = uPortApp.receive(responseToken)
 
-  // TODO: とりあえずのフローなんでもっといいのあったらそっちにする
-  // - system: get NMID->ProxyContract_ADDR->NFT_ADDR
-  let mnid = ...
-  let nft_owner_addr = decode(mnid).address
-
-  // - system: get NFT.isStudent state
-  let web3 = ...
-  let nft_addr = NakajoDictionaryContract.at("const").findNFT(nft_owner_addr)
-  let isStudent = GakuseiContract.at(nft_addr).isStudent()
-
-  if (!isStudent) res.json({ msg: 'Failed. You might be not a student', coupon: null });
+  if (!profile.isStudent) res.json({ msg: 'Failed. You might be not a student', coupon: null });
 
   // - system: generate onetime coupon by "bytes6(sha3(MNID + EventID))"
-  let coupon = `bytes6(sha3(MNID+${req.body.id}))`
+  let coupon = `bytes6(sha3(${profile.mnid}+${req.body.id}))`
 
   // - system: OAuth to EventBrite
   let code = await axios.get(`https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=${EVENTBRITE_CLIENT_KEY}`)
