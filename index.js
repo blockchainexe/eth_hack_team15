@@ -4,6 +4,7 @@ const uport = require('uport')
 const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
 const jwtDecode = require('jwt-decode')
+const url = require('url')
 
 if (process.env.NODE_ENV != 'production') {
   require('dotenv').config()
@@ -25,7 +26,7 @@ const uPortApp = new uport.Credentials({
 
 const verifier = new EmailVerifier({
   credentials: uPortApp,
-  callbackUrl: `https://${host}/verify`,
+  callbackUrl: `https://${host}/callback`,
   user: emailUser,
   pass: emailPass,
   service: 'gmail',
@@ -52,22 +53,18 @@ app.post('/register', function (req, res) {
   res.json({ msg: 'success' })
 })
 
-app.get('/verify', function (req, res) {
-  res.render('pages/verify')
+app.get('/callback', function (req, res) {
+  res.render('pages/callback')
 })
 
 app.post('/verify', function (req, res) {
   res.header("Access-Control-Allow-Origin", "*");
 
-  const accessToken = req.body.access_token
-  console.log(accessToken)
+  const accessToken = req.body[1].value
 
   const requestToken = jwtDecode(accessToken).req
-  console.log(requestToken)
   const callbackUrlWithEmail = jwtDecode(requestToken).callback
-  console.log(callbackUrlWithEmail)
   const email = url.parse(callbackUrlWithEmail, true).query.email
-  console.log(email)
 
   res.json({ msg: 'success' });
 })
