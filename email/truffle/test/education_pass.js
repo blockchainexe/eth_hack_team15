@@ -50,4 +50,28 @@ contract('EducationPass', function(accounts) {
       await expectRevert(educationPass.mint(accounts[0], 123456))
     })
   })
+
+  describe('exits', () => {
+    it('success', async () => {
+      const educationPass = await EducationPass.new()
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      assert.isTrue(exists)
+    })
+    it('no mint', async () => {
+      const educationPass = await EducationPass.new()
+      const exists = await educationPass.exists(12345)
+      assert.isFalse(exists)
+    })
+    it('expired', async () => {
+      const educationPass = await EducationPass.new()
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      assert.isTrue(exists)
+
+      await increaseTime((4 * 365 * 24 * 60 * 60) + 2000)
+      const expiredExists = await educationPass.exists(12345)
+      assert.isFalse(expiredExists)
+    })
+  })
 });
