@@ -39,7 +39,7 @@ contract('EducationPass', function(accounts) {
       assert.equal(0, beforeBalance)
 
       await educationPass.mint(accounts[0], 12345)
-      await expectRevert(educationPass.mint(accounts[0], 12345))
+      await expectRevert(educationPass.mint(accounts[1], 12345))
     })
     it('failed, deplication owner.', async () => {
       const educationPass = await EducationPass.new()
@@ -72,6 +72,48 @@ contract('EducationPass', function(accounts) {
       await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
       const expiredExists = await educationPass.exists(12345)
       assert.isFalse(expiredExists)
+    })
+  })
+
+  describe('exnted limit', () => {
+    it('success', async () => {
+      const educationPass = await EducationPass.new()
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
+      const expiredExists = await educationPass.exists(12345)
+      assert.isFalse(expiredExists)
+
+      await educationPass.mint(accounts[0], 12345)
+      const extended = await educationPass.exists(12345)
+      assert.isTrue(extended)
+
+    })
+  })
+
+  describe('fail other id', () => {
+    it('success', async () => {
+      const educationPass = await EducationPass.new()
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
+      const expiredExists = await educationPass.exists(12345)
+      assert.isFalse(expiredExists)
+
+      await expectRevert(educationPass.mint(accounts[0], 123456))
+    })
+  })
+
+  describe('fail other owner', () => {
+    it('success', async () => {
+      const educationPass = await EducationPass.new()
+      await educationPass.mint(accounts[0], 12345)
+      const exists = await educationPass.exists(12345)
+      await increaseTime((1 * 365 * 24 * 60 * 60) + 2000)
+      const expiredExists = await educationPass.exists(12345)
+      assert.isFalse(expiredExists)
+
+      await expectRevert(educationPass.mint(accounts[1], 12345))
     })
   })
 });
