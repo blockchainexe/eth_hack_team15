@@ -3,6 +3,7 @@ const app = express()
 const uport = require('uport')
 const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
+const jwtDecode = require('jwt-decode')
 
 if (process.env.NODE_ENV != 'production') {
   require('dotenv').config()
@@ -50,7 +51,19 @@ app.post('/register', function (req, res) {
 })
 
 app.get('/verify', function (req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
 
+  const accessToken = req.body.access_token
+  console.log(accessToken)
+
+  const requestToken = jwtDecode(accessToken).req
+  console.log(requestToken)
+  const callbackUrlWithEmail = jwtDecode(requestToken).callback
+  console.log(callbackUrlWithEmail)
+  const email = url.parse(callbackUrlWithEmail, true).query.email
+  console.log(email)
+
+  res.json({ msg: 'success' });
 })
 
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
