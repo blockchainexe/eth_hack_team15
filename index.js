@@ -24,7 +24,7 @@ const uPortApp = new uport.Credentials({
 
 const verifier = new EmailVerifier({
   credentials: uPortApp,
-  callbackUrl: `https://${host}${ (port) ? ":"+port : "" }/verify`, // TODO: change callback url
+  callbackUrl: `https://${host}/verify`,
   user: emailUser,
   pass: emailPass,
   service: 'gmail',
@@ -49,4 +49,4 @@ app.post('/register', function (req, res) {
   res.json({ msg: 'success' });
 })
 
-app.listen(port, () => console.log('Example app listening on port 3000!'))
+app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
