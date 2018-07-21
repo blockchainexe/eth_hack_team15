@@ -51,6 +51,10 @@ app.post('/register', function (req, res) {
 })
 
 app.get('/verify', function (req, res) {
+  res.render('pages/verify')
+})
+
+app.post('/verify', function (req, res) {
   res.header("Access-Control-Allow-Origin", "*");
 
   const accessToken = req.body.access_token
