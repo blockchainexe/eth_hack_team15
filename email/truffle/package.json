@@ -1,0 +1,26 @@
+{
+  "name": "uport-email-truffle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "author": "Yukishige Nakajo <nakajo@haw.co.jp> (http://y-nakajo.hatenablog.com/)",
+  "license": "ISC",
+  "devDependencies": {
+    "lk-test-helpers": "^0.1.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-stage-2": "^6.18.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "babel-register": "^6.26.0"
+  },
+  "dependencies": {
+    "truffle": "^4.1.13",
+    "zeppelin-solidity": "^1.10.0"
+  }
+}

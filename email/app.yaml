@@ -1,0 +1,4 @@
+runtime: nodejs8
+api_version: 1
+
+instance_class: F1

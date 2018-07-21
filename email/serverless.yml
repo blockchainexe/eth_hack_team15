@@ -1,0 +1,23 @@
+service: uport-email-verification
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-east-1
+  environment:
+    PORT: 5000
+
+functions:
+  app:
+    handler: server.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+
+plugins:
+  - serverless-finch
+custom:
+  client:
+    bucketName: static-uport-test
+    distributionFolder: client/build
