@@ -16,8 +16,8 @@
         <h1>Gakusei</h1>
         <p>uportアプリでQRをスキャンして学生であることを証明できます</p>
         <button type="button" class="btn btn-primary" id="login">Login with uPort</button>
-        <ul id="result">
-        </ul>
+        <ul id="result"></ul>
+        <p id="coupon"></p>
     </div>
 </main>
 
@@ -35,6 +35,8 @@
         })
 
         document.getElementById("login").addEventListener("click", function(){
+            issueCoupon("<%= address %>")
+            /*
             connect.requestCredentials({
                 requested: [
                     'name',
@@ -54,12 +56,29 @@
                     <li>${credentials.org.hi-ether.school_name}</li>
                     <li>${credentials.org.hi-ether.is_student}</li>
                 `
+                if ( credentials ? credentials.org.hi-ether ? credentials.org.hi-ether.is_student : false : false ) {
+                    issueCoupon("<%= address %>")
+                }
             })
             .catch(err=>{
                 console.log(err)
             })
+            */
         })
 
+    }
+
+    function issueCoupon(mnid){
+        axios({
+            method: 'POST',
+            url: `http://<%= host %><%= port ? ":"+port : "" %>/events/${1}/coupon`,
+            data: { mnid: mnid }
+        }).then(res => {
+            document.getElementById("coupon").innerHTML = `
+                <p>${res.data.msg}
+                <p>${res.data.coupon}
+            `
+        })
     }
 </script>
 
