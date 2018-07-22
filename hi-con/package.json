@@ -1,0 +1,20 @@
+{
+  "name": "hi-con",
+  "version": "1.0.0",
+  "description": "``` # sequence - student: put email to form - system: send QR to email - student: scan QR - student: accept verification - system: got hit /verify action - system: get NMID->ProxyContract_ADDR->NFT_ADDR - system: get NFT.isStudent state - system: generate onetime coupon by \"bytes6(sha3(MNID + EventID))\"  - system: OAuth to EventBrite - system: Save coupon to EventBrite - user: get coupon ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "jwt-decode": "^2.2.0",
+    "mnid": "^0.1.1",
+    "uport": "^0.6.2"
+  }
+}

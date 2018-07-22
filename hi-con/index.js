@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 const uport = require('uport')
-const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
 const jwtDecode = require('jwt-decode')
 const axios = require('axios')
@@ -28,10 +27,18 @@ const uPortApp = new uport.Credentials({
 
 app.use(bodyParser.json({ strict: false }))
 
-app.get('/', (req, res) => function (req, res) {
+app.options("/*", function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  const allowHeader = req.header("Access-Control-Request-Headers");
+  res.header("Access-Control-Allow-Headers", allowHeader ? allowHeader : "*");
+  res.send(200);
+});
+
+app.get('/', async (req, res) => {
   res.send('Let user input his unique info')
 })
-app.get('/show_request', (req, res) => function (req, res) {
+app.get('/show_request', async (req, res) => {
   // この画面でuport-connect使ってloginさせてそのままclientでrequestCredentialsさせたほうがいい？
   /*
   // client側
@@ -44,22 +51,23 @@ app.get('/show_request', (req, res) => function (req, res) {
 })
 
 
-app.post('/events/:id/request_token', async function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+app.post('/events/:id/request_token', async (req, res) => {
   const requestToken = await uPortApp.createRequest({
-    requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to
+    requested: ['email'],
+    callbackUrl: `http://${host}${port ? ":"+port : ""}/events/${req.body.id}/coupon` // URL to send the response of the request to
   })
+  const profile = await uPortApp.receive(requestToken)
+  console.log(profile)
 })
 
-app.post('/events/:id/coupon', async function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+app.post('/events/:id/coupon', async (req, res) => {
+  console.log(req)
   const profile = uPortApp.receive(responseToken)
 
   if (!profile.isStudent) res.json({ msg: 'Failed. You might be not a student', coupon: null });
 
   // - system: generate onetime coupon by "bytes6(sha3(MNID + EventID))"
-  let coupon = `bytes6(sha3(${profile.mnid}+${req.body.id}))`
+  let coupon = `bytes6(sha3(${profile.mnid}+${req.params.id}))`
 
   // - system: OAuth to EventBrite
   let code = await axios.get(`https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=${EVENTBRITE_CLIENT_KEY}`)
@@ -67,7 +75,7 @@ app.post('/events/:id/coupon', async function (req, res) {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     data: `code=${code}&client_secret=${EVENTBRITE_CLIENT_SECRET}&client_id=${EVENTBRITE_CLIENT_KEY}&grant_type=authorization_code`,
-    "https://www.eventbrite.com/oauth/token",
+    url: "https://www.eventbrite.com/oauth/token"
   })
 
   // - system: Save coupon to EventBrite
@@ -86,7 +94,7 @@ app.post('/events/:id/coupon', async function (req, res) {
   discount.ticket_group_id	string	No	ID of the ticket group.
   discount.hold_ids	list	No	IDs of holds this discount can unlock.
   */
-  let access_token = await axios({
+  let coupon_res = await axios({
     method: 'get',
     headers: { 'Authorization': `Bearer ${access_token}`},
     data: {
@@ -104,7 +112,7 @@ app.post('/events/:id/coupon', async function (req, res) {
       "discount.ticket_group_id": "",
       "discount.hold_ids": ""
     },
-    "https://www.eventbrite.com/oauth/token",
+    url: "https://www.eventbrite.com/oauth/token"
   })
 
   res.json({ msg: 'success', coupon: coupon });
