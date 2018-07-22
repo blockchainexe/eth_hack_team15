@@ -41,7 +41,9 @@ app.get('/', async (req, res) => {
   res.render('pages/index', {
     host: host,
     port: port,
-    uportAppNames: appName
+    uportAppNames: appName,
+    address: address,
+    privateKey: privateKey
   });
 })
 
