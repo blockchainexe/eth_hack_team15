@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+      $(function () {
+        var email = location.search.replace("?email=", "")
+        var token = location.hash.replace("#access_token=", "")
+
+        $("#email").val(email)
+        $("#token").val(token)
+
+        setTimeout(function () {
+          var data = JSON.stringify($("form").serializeArray())
+
+          $.ajax({
+            type: "POST",
+            url: "/verify",
+            data: data,
+            success: function () { alert("Success!") },
+            dataType: "json",
+            contentType : "application/json"
+          })
+        }, 1000)
+      })
+    </script>
+  </head>
+  <body>
+    <form action="/verify" method="post" style="display: none;">
+      <input id="email" name="email" type="text">
+      <input id="token" name="token" type="text">
+      <input type="submit" value="Continue">
+    </form>
+  </body>
+</html>
