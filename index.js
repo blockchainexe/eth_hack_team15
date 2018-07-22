@@ -3,10 +3,9 @@ const app = express()
 const uport = require('uport')
 const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
-
-if (process.env.NODE_ENV != 'production') {
-  require('dotenv').config()
-}
+const jwtDecode = require('jwt-decode')
+const url = require('url')
+require('dotenv').config()
 
 const appName = process.env.APP_NAME
 const address = process.env.ADDRESS
@@ -33,20 +32,45 @@ const verifier = new EmailVerifier({
   attestationSubject: 'uPort Email Attestation',
   attestationTemplate: qr => `<html>...${qr}...</html>`,
   customRequestParams: {},
-  qrFolder: './tmp'
+  qrFolder: '/tmp/'
 })
 
 app.use(bodyParser.json({ strict: false }))
 
+app.set('view engine', 'ejs')
+
+app.options("/*", function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  const allowHeader = req.header("Access-Control-Request-Headers");
+  res.header("Access-Control-Allow-Headers", allowHeader ? allowHeader : "*");
+  res.send(200);
+});
+
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.post('/register', function (req, res) {
-  res.header('Access-Control-Allow-Origin', '*');
-
+  res.header('Access-Control-Allow-Origin', '*')
+  console.log(req.body.email)
   const email = req.body.email
-  const requestToken = verifier.receive(email);
+  const requestToken = verifier.receive(email)
 
-  res.json({ msg: 'success' });
+  res.json({ msg: 'success' })
+})
+
+
+app.post('/verify', function (req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
+
+  const accessToken = req.body.access_token;
+
+  const requestToken = jwtDecode(accessToken).req
+  const callbackUrlWithEmail = jwtDecode(requestToken).callback
+  const email = url.parse(callbackUrlWithEmail, true).query.email
+
+  const identity = verifier.verify(accessToken)
+
+  res.json({ msg: 'success', identity: identity })
 })
 
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
