@@ -5,7 +5,7 @@ const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
 const jwtDecode = require('jwt-decode')
 const url = require('url')
-  require('dotenv').config()
+require('dotenv').config()
 
 const appName = process.env.APP_NAME
 const address = process.env.ADDRESS

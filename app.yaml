@@ -1,5 +1,5 @@
 runtime: nodejs8
 api_version: 1
-module: gakusei
+service: gakusei
 
 instance_class: F1
