@@ -16,6 +16,8 @@
         <h1>Gakusei</h1>
         <p>uportアプリでQRをスキャンして学生であることを証明できます</p>
         <button type="button" class="btn btn-primary" id="login">Login with uPort</button>
+        <ul id="result">
+        </ul>
     </div>
 </main>
 
@@ -34,11 +36,24 @@
 
         document.getElementById("login").addEventListener("click", function(){
             connect.requestCredentials({
-                requested: ['name', 'phone', 'country', 'org.hi-ether.is_student'],
+                requested: [
+                    'name',
+                    'phone',
+                    'country',
+                    'org.hi-ether.email',
+                    'org.hi-ether.school_name',
+                    'org.hi-ether.is_student'],
                 notifications: true // We want this if we want to recieve credentials
             }).then((credentials) => {
                 // TODO: Uport AppのAccept画面でUnable to resolve DID document for did:uport:<このclientID>エラーが出る
-                console.log(credentials)
+                docuemnt.getElementById("result").innerHTML = `
+                    <li>${credentials.name}</li>
+                    <li>${credentials.phone}</li>
+                    <li>${credentials.country}</li>
+                    <li>${credentials.org.hi-ether.email}</li>
+                    <li>${credentials.org.hi-ether.school_name}</li>
+                    <li>${credentials.org.hi-ether.is_student}</li>
+                `
             })
             .catch(err=>{
                 console.log(err)
