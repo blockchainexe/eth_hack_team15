@@ -13,7 +13,8 @@ module.exports = {
         );
       },
       network_id: 3,
-      gas: 5000000
+      gasPrice: web3.toWei(20, 'GWei'),
+      gas: 3000000
     }   
   }
 };
