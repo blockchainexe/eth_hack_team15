@@ -26,7 +26,7 @@ const uPortApp = new uport.Credentials({
 
 const verifier = new EmailVerifier({
   credentials: uPortApp,
-  callbackUrl: `https://${host}/callback`,
+  callbackUrl: `https://${host}/verify`,
   user: emailUser,
   pass: emailPass,
   service: 'gmail',
@@ -40,7 +40,13 @@ const verifier = new EmailVerifier({
 
 app.use(bodyParser.json({ strict: false }))
 
-app.set('view engine', 'ejs')
+app.options('/*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  const allowHeader = req.header('Access-Control-Request-Headers')
+  res.header('Access-Control-Allow-Headers', allowHeader ? allowHeader : '*')
+  res.send(200)
+});
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
@@ -53,14 +59,10 @@ app.post('/register', function (req, res) {
   res.json({ msg: 'success' })
 })
 
-app.get('/callback', function (req, res) {
-  res.render('pages/callback')
-})
-
 app.post('/verify', function (req, res) {
   res.header("Access-Control-Allow-Origin", "*");
 
-  const accessToken = req.body[1].value
+  const accessToken = req.body.access_token
 
   const requestToken = jwtDecode(accessToken).req
   const callbackUrlWithEmail = jwtDecode(requestToken).callback
