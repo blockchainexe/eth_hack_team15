@@ -18,6 +18,7 @@ const host = process.env.HOST
 const port = process.env.PORT || 3000
 const EVENTBRITE_CLIENT_KEY = process.env.EVENTBRITE_CLIENT_KEY
 const EVENTBRITE_CLIENT_SECRET = process.env.EVENTBRITE_CLIENT_SECRET
+const NETWORK_ID = process.env.NETWORK_ID
 
 const uPortApp = new uport.Credentials({
   appName: appName,
@@ -26,6 +27,7 @@ const uPortApp = new uport.Credentials({
 })
 
 app.use(bodyParser.json({ strict: false }))
+app.set('view engine', 'ejs')
 
 app.options("/*", function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -36,33 +38,25 @@ app.options("/*", function (req, res, next) {
 });
 
 app.get('/', async (req, res) => {
-  res.send('Let user input his unique info')
-})
-app.get('/show_request', async (req, res) => {
-  // この画面でuport-connect使ってloginさせてそのままclientでrequestCredentialsさせたほうがいい？
-  /*
-  // client側
-  const connect = new uportconnect.Connect('app name')
-  connect.showRequest(requestToken).then(response => {
-    // send response back to server
-  })
-  */
-  res.send('Let user input his unique info')
+  res.render('pages/index', {
+    host: host,
+    port: port,
+    uportAppNames: appName
+  });
 })
 
-
-app.post('/events/:id/request_token', async (req, res) => {
-  const requestToken = await uPortApp.createRequest({
-    requested: ['email'],
-    callbackUrl: `http://${host}${port ? ":"+port : ""}/events/${req.body.id}/coupon` // URL to send the response of the request to
-  })
-  const profile = await uPortApp.receive(requestToken)
-  console.log(profile)
-})
+// client側でrequestCredentialsするので不要
+// app.post('/events/:id/request_token', async (req, res) => {
+//   const requestToken = await uPortApp.createRequest({
+//     network_id: NETWORK_ID,
+//     requested: ['email'],
+//     callbackUrl: `http://${host}${port ? ":"+port : ""}/events/${req.body.id}/coupon` // URL to send the response of the request to
+//   })
+//   res.send(requestToken)
+// })
 
 app.post('/events/:id/coupon', async (req, res) => {
-  console.log(req)
-  const profile = uPortApp.receive(responseToken)
+  const profile = uPortApp.receive(req.body.responseToken)
 
   if (!profile.isStudent) res.json({ msg: 'Failed. You might be not a student', coupon: null });
 

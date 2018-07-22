@@ -1,0 +1,44 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container">
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main>
+    <div class="jumbotron">
+        <h1>Gakusei</h1>
+        <p>uportログインするだけで学生かどうかわかります</p>
+        <button type="button" class="btn btn-primary" id="login">Login with uPort</button>
+    </div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+
+<script>
+    window.onload = function(){
+        const connect = new uportconnect.Connect("<%= uportAppNames %>")
+
+        document.getElementById("login").addEventListener("click", function(){
+            connect.requestCredentials().then((credentials) => {
+                console.log(credentials)
+            })
+            .catch(err=>{
+console.log(err)
+            })
+        })
+
+    }
+</script>
+
+</body>
+</html>
