@@ -3,6 +3,8 @@ const app = express()
 const uport = require('uport')
 const EmailVerifier = require('uport-verify-email').default
 const bodyParser = require('body-parser')
+const jwtDecode = require('jwt-decode')
+const url = require('url')
 
 if (process.env.NODE_ENV != 'production') {
   require('dotenv').config()
@@ -24,7 +26,7 @@ const uPortApp = new uport.Credentials({
 
 const verifier = new EmailVerifier({
   credentials: uPortApp,
-  callbackUrl: `https://${host}/verify`,
+  callbackUrl: `https://${host}/callback`,
   user: emailUser,
   pass: emailPass,
   service: 'gmail',
@@ -38,15 +40,35 @@ const verifier = new EmailVerifier({
 
 app.use(bodyParser.json({ strict: false }))
 
+app.set('view engine', 'ejs')
+
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.post('/register', function (req, res) {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', '*')
 
   const email = req.body.email
-  const requestToken = verifier.receive(email);
+  const requestToken = verifier.receive(email)
 
-  res.json({ msg: 'success' });
+  res.json({ msg: 'success' })
+})
+
+app.get('/callback', function (req, res) {
+  res.render('pages/callback')
+})
+
+app.post('/verify', function (req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
+
+  const accessToken = req.body[1].value
+
+  const requestToken = jwtDecode(accessToken).req
+  const callbackUrlWithEmail = jwtDecode(requestToken).callback
+  const email = url.parse(callbackUrlWithEmail, true).query.email
+
+  const identity = verifier.verify(accessToken)
+
+  res.json({ msg: 'success', identity: identity })
 })
 
 app.listen(port, () => console.log('Example app listening on port ' + port + '!'))
