@@ -23,7 +23,7 @@ const uPortApp = new uport.Credentials({
 
 const verifier = new EmailVerifier({
   credentials: uPortApp,
-  callbackUrl: `https://${host}/callback`,
+  callbackUrl: `https://${host}/verify`,
   user: emailUser,
   pass: emailPass,
   service: 'gmail',
